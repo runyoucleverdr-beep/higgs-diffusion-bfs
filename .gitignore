@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Data
+data/raw/
+data/interim/
+data/processed/
+
+# Outputs
+outputs/figures/
+outputs/tables/
+outputs/logs/
+
+# Local config
+*.log
