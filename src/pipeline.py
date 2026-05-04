@@ -4,6 +4,7 @@ from src.activity_parser import load_activity_data, get_retweet_activity
 from src.source_selection import select_earliest_users
 from src.bfs_analysis import bfs_distances, summarize_bfs, level_counts
 from src.metrics import results_to_dataframe
+from src.source_selection import select_earliest_original_sources
 
 
 def run_pipeline(config: dict):
@@ -17,7 +18,7 @@ def run_pipeline(config: dict):
     activity_df = load_activity_data(config["paths"]["activity_file"])
     retweet_df = get_retweet_activity(activity_df)
 
-    sources = select_earliest_users(
+    sources = select_earliest_original_sources(
         retweet_df,
         top_k=config["experiment"]["num_early_users"]
     )
@@ -26,6 +27,9 @@ def run_pipeline(config: dict):
     level_details = {}
 
     for source in sources:
+        source_str = str(source)
+        print(f"Source {source_str}: out_degree={graph.out_degree(source_str)}")
+
         distances = bfs_distances(graph, source)
         summary = summarize_bfs(distances, graph.number_of_nodes())
         summary["source"] = source

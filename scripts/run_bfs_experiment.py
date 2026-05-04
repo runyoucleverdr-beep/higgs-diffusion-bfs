@@ -1,4 +1,9 @@
 from pathlib import Path
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from src.config import load_config, ensure_dir
 from src.pipeline import run_pipeline
 from src.visualize import plot_top_sources_bar, plot_bfs_levels

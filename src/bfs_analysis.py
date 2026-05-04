@@ -31,14 +31,21 @@ def summarize_bfs(distances: dict[str, int], total_nodes: int) -> dict:
             "avg_distance": 0.0,
         }
 
-    dists = list(distances.values())
+    dist_values = sorted(distances.values())
     reachable_nodes = len(distances)
+
+    if len(dist_values) % 2 == 1:
+        median_distance = float(dist_values[len(dist_values) // 2])
+    else:
+        mid = len(dist_values) // 2
+        median_distance = (dist_values[mid - 1] + dist_values[mid]) / 2.0
 
     return {
         "reachable_nodes": reachable_nodes,
         "reachable_ratio": reachable_nodes / total_nodes if total_nodes > 0 else 0.0,
-        "max_depth": max(dists),
-        "avg_distance": sum(dists) / len(dists),
+        "max_depth": max(dist_values),
+        "avg_distance": sum(dist_values) / len(dist_values),
+        "median_distance": median_distance,
     }
 
 

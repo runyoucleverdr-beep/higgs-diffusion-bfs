@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import networkx as nx
 from src.io_utils import iter_lines
 
@@ -19,10 +21,16 @@ def load_retweet_graph(path: str) -> nx.DiGraph:
 
 
 def reverse_graph_for_information_flow(graph: nx.DiGraph) -> nx.DiGraph:
+    """
+    Reverse edge direction so that edges better represent information flow.
+    """
     return graph.reverse(copy=True)
 
 
 def summarize_graph(graph: nx.DiGraph) -> dict:
+    num_nodes = graph.number_of_nodes()
+    num_edges = graph.number_of_edges()
+    
     return {
         "num_nodes": graph.number_of_nodes(),
         "num_edges": graph.number_of_edges(),

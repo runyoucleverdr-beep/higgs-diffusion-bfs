@@ -2,6 +2,11 @@ from src.config import load_config
 from src.graph_builder import load_retweet_graph, summarize_graph
 from src.activity_parser import load_activity_data
 
+from pathlib import Path
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
 
 def main():
     config = load_config()

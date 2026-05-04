@@ -1,6 +1,6 @@
 paths:
-  activity_file: data/raw/higgs-activity_time.txt.gz
   retweet_network: data/raw/higgs-retweet_network.edgelist.gz
+  activity_file: data/raw/higgs-activity_time.txt.gz
   output_tables: outputs/tables
   output_figures: outputs/figures
 

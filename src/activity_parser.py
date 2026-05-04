@@ -23,17 +23,34 @@ def load_activity_data(path: str) -> pd.DataFrame:
         )
 
     df = pd.DataFrame(rows)
+    if df.empty:
+        raise ValueError("Activity file was loaded, but no valid rows were parsed.")
     return df
 
 
 def get_retweet_activity(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Keep only retweet rows.
+    """
+    if "interaction" not in df.columns:
+        raise KeyError("Expected column 'interaction' not found in activity dataframe.")
+
+    
     return df[df["interaction"].str.lower() == "rt"].copy()
 
 
-def get_earliest_active_users(df: pd.DataFrame, top_k: int = 10) -> list[str]:
+def get_earliest_users_by_column(df: pd.DataFrame, user_col: str, top_k: int = 10) -> list:
+    if df.empty:
+        return []
+
+    if user_col not in df.columns:
+        raise KeyError(f"Expected column '{user_col}' not found.")
+
+    
+    
     first_seen = (
-        df.groupby("user_a", as_index=False)["timestamp"]
+        df.groupby(user_col, as_index=False)["timestamp"]
         .min()
         .sort_values("timestamp", ascending=True)
     )
-    return first_seen["user_a"].head(top_k).tolist()
+    return first_seen[user_col].head(top_k).tolist()
