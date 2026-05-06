@@ -1,10 +1,9 @@
 from __future__ import annotations
-from src.graph_builder import load_retweet_graph, reverse_graph_for_information_flow, summarize_graph
+from src.graph_builder import load_retweet_graph, reverse_graph_for_information_flow, summarize_graph,summarize_weakly_connected_components,
 from src.activity_parser import load_activity_data, get_retweet_activity
-from src.source_selection import select_earliest_users
+from src.source_selection import build_source_groups
 from src.bfs_analysis import bfs_distances, summarize_bfs, level_counts
-from src.metrics import results_to_dataframe
-from src.source_selection import select_earliest_original_sources
+from src.metrics import results_to_dataframe, summarize_by_source_type
 
 
 def run_pipeline(config: dict):
@@ -14,36 +13,58 @@ def run_pipeline(config: dict):
         graph = reverse_graph_for_information_flow(graph)
 
     graph_summary = summarize_graph(graph)
+    wcc_summary = summarize_weakly_connected_components(graph)
+    graph_summary.update(wcc_summary)
 
     activity_df = load_activity_data(config["paths"]["activity_file"])
     retweet_df = get_retweet_activity(activity_df)
 
-    sources = select_earliest_original_sources(
-        retweet_df,
-        top_k=config["experiment"]["num_early_users"]
-    )
+    source_groups = build_source_groups(retweet_df, graph, config)
+
 
     results = []
     level_details = {}
 
-    for source in sources:
-        source_str = str(source)
-        print(f"Source {source_str}: out_degree={graph.out_degree(source_str)}")
+    for source_type, sources in source_groups.items():
+        print("\n" + "=" * 70)
+        print(f"Running BFS for source group: {source_type}")
+        print("=" * 70)
 
-        distances = bfs_distances(graph, source)
-        summary = summarize_bfs(distances, graph.number_of_nodes())
-        summary["source"] = source
-        results.append(summary)
-        level_details[source] = level_counts(distances)
+        for source in sources:
+            source_str = str(source)
+            print(f"Source {source_str}: out_degree={graph.out_degree(source_str)}")
+
+            distances = bfs_distances(graph, source_str)
+            
+            summary = summarize_bfs(distances, graph.number_of_nodes())
+            summary["source"] = source_str
+            results.append(summary)
+            level_details["{0}::{1}".format(source_type, source_str)] = level_counts(distances)
 
     results_df = results_to_dataframe(results)
+
+    if not results_df.empty:
+        ordered_cols = [
+            "source",
+            "source_type",
+            "out_degree",
+            "reachable_nodes",
+            "reachable_ratio",
+            "max_depth",
+            "avg_distance",
+            "median_distance",
+        ]
+        results_df = results_df[ordered_cols]
+
+    source_type_summary_df = summarize_by_source_type(results_df)
 
     return {
         "graph": graph,
         "graph_summary": graph_summary,
         "activity_df": activity_df,
         "retweet_df": retweet_df,
-        "sources": sources,
+        "source_groups": source_groups,
         "results_df": results_df,
+        "source_type_summary_df": source_type_summary_df,
         "level_details": level_details,
     }

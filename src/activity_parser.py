@@ -3,11 +3,17 @@ import pandas as pd
 from src.io_utils import iter_lines
 
 def load_activity_data(path: str) -> pd.DataFrame:
+    """
+    Load activity data with columns:
+    user_a, user_b, timestamp, interaction
+    """
+    
     rows = []
 
     for line in iter_lines(path):
         if not line:
             continue
+
         parts = line.split()
         if len(parts) < 4:
             continue
@@ -23,6 +29,7 @@ def load_activity_data(path: str) -> pd.DataFrame:
         )
 
     df = pd.DataFrame(rows)
+    
     if df.empty:
         raise ValueError("Activity file was loaded, but no valid rows were parsed.")
     return df
@@ -40,6 +47,10 @@ def get_retweet_activity(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_earliest_users_by_column(df: pd.DataFrame, user_col: str, top_k: int = 10) -> list:
+    """
+    Select earliest users based on the first timestamp of the specified column.
+    """
+    
     if df.empty:
         return []
 

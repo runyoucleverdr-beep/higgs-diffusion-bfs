@@ -1,6 +1,6 @@
 paths:
-  retweet_network: data/raw/higgs-retweet_network.edgelist.gz
   activity_file: data/raw/higgs-activity_time.txt.gz
+  retweet_network: data/raw/higgs-retweet_network.edgelist.gz
   output_tables: outputs/tables
   output_figures: outputs/figures
 
@@ -8,6 +8,7 @@ experiment:
   num_early_users: 10
   num_random_users: 10
   random_seed: 42
+  num_earliest_sources: 10
 
 graph:
   reverse_for_information_flow: true
