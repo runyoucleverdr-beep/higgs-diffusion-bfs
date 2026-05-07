@@ -394,6 +394,6 @@ Please refer to the original SNAP dataset source for data usage conditions.
 ---
 
 ## 16. AI usage
-I used AI to generate some high-tech style pictures to make it look nicer. 
+I used AI to generate some high-tech style pictures in the slides to make them look nicer. 
 
 ---
