@@ -8,7 +8,13 @@
 
 ## 1. Project Overview
 
-This project studies how scientific news spreads through a large social network using the **SNAP Higgs Twitter Dataset**. The main goal is to model the Twitter retweet network as a directed graph and apply **Breadth-First Search (BFS)** to analyze information diffusion.
+This project looks at how scientific news spreads on Twitter, using public data collected around the Higgs boson discovery. In simple terms, it asks how a piece of information moves from one user to another through retweets.
+
+To study this, the project turns Twitter retweet activity into a network map:
+- each user is a point in the map
+- each retweet creates a connection between users
+
+The project then uses a step-by-step search method called Breadth-First Search (BFS). In this project, BFS is used to trace how information could spread outward from a starting user, one layer at a time.
 
 The project focuses on three main questions:
 
@@ -16,24 +22,29 @@ The project focuses on three main questions:
 2. **How deep** can a diffusion cascade extend in terms of hop count?
 3. **Which early users** are structurally positioned to trigger broader cascades?
 
-The current implementation uses the **retweet layer** of the Higgs dataset and reverses the edge direction to better represent **information flow** from source users to later retweeters.
+To better reflect the direction in which information is likely to move, the project reverses the original retweet links before analysis. This makes the network better match the idea of information flowing from an earlier source to later retweeters.
 
 ---
 
 ## 2. Research Question
 
-This project asks whether diffusion potential in a large Twitter retweet network is mainly determined by:
+The main question of this project is:
 
-- simple early appearance,
-- random structural location,
-- or stronger directed structural position.
+What makes a user more likely to spread information widely in a Twitter retweet network?
 
-To test this, the project compares BFS diffusion outcomes across three different source-selection strategies:
+More specifically, the project compares three possibilities:
 
-- **earliest_original**
-- **top_out_degree**
-- **random**
+- users who appear early in the discussion,
+- users chosen at random,
+- users who are already well connected in the retweet network.
 
+To test this, the project compares three groups of starting users:
+
+- **earliest_original**: users who appear early and are treated as likely early sources of information
+- **top_out_degree**: users with many outward connections in the analyzed network
+- **random**: randomly selected users used as a baseline for comparison
+
+By comparing these three groups, the project asks whether broad diffusion is mainly related to timing, chance, or network position.
 
 ---
 
@@ -63,49 +74,92 @@ The current project uses:
 ### Important note on edge direction
 To analyze **information diffusion**, this project reverses the original retweet edge direction. This is because the observed retweet action and the direction of information flow are not the same.
 
+
 ---
 
 ## 4. Method
 
-### Core algorithm
-The main algorithm used in this project is **Breadth-First Search (BFS)**.
+This project uses a network-based approach to study how information can spread through Twitter retweets.
 
-### Why BFS
-BFS is appropriate because it explores the graph level by level, which naturally matches the layered structure of information diffusion.
+### Step 1: Build an information-flow network
 
-### Metrics currently computed
-For each selected source user, the project computes:
+The retweet data is converted into a network:
 
-- `reachable_nodes`
-- `reachable_excluding_self`
-- `reachable_ratio`
-- `max_depth`
-- `avg_distance`
-- `median_distance`
-- `out_degree`
-- `in_largest_wcc`
-- `in_largest_scc`
+* each user is treated as a node
+* each retweet relation is treated as a connection between users
 
-### Structural diagnostics
-The project also measures global graph structure using:
+Because the goal is to study how information moves from earlier users to later retweeters, the direction of the original retweet links is reversed before analysis.
 
-- weakly connected components (WCC)
-- strongly connected components (SCC)
+### Step 2: Choose starting users
 
-This helps distinguish broad weak connectivity from true directed structural core membership.
+The project compares three different kinds of starting users:
+
+* **earliest_original**: users who appeared early and are treated as likely early sources of information
+* **top_out_degree**: users with many outward connections in the analyzed network
+* **random**: randomly selected users used as a baseline
+
+This makes it possible to compare whether broad diffusion is more closely related to **timing**, **network position**, or **chance**.
+
+### Step 3: Trace how information could spread
+
+The main algorithm used is **Breadth-First Search (BFS)**.
+
+In simple terms, BFS starts from one user and then moves outward step by step:
+
+* first to directly connected users
+* then to users one step further away
+* then to the next layer, and so on
+
+This makes BFS a natural way to study layered information diffusion.
+
+### Step 4: Measure diffusion outcomes
+
+For each starting user, the project measures:
+
+* **reachable nodes**: how many users can be reached
+* **reachable ratio**: what share of the whole network can be reached
+* **maximum depth**: how many layers the diffusion can extend
+* **average distance**: the average number of steps needed to reach other users
+* **median distance**: the middle value of those step counts
+
+These measures help describe both the **size** and the **depth** of diffusion.
+
+### Step 5: Add structural diagnostics
+
+To better understand why some users spread information much more effectively than others, the project also examines:
+
+* whether a user is located inside the largest connected part of the network
+* whether the network is broadly connected or only weakly connected
+* how strongly a user’s number of outward connections is associated with diffusion reach
+
+This helps explain not only **what** happens, but also **why** it happens.
+
 
 ---
 
-## 5. Current Findings
+## 5. Current Findings and Interpretation
 
-The current experiment supports several conclusions:
+The current results suggest several clear patterns.
 
-1. **Random users usually have little or no diffusion ability.**
-2. **Earliest original sources are heterogeneous**: some spread broadly, while others remain trapped in very small local structures.
-3. **Top out-degree users are generally the strongest spreaders**, but not every high-degree node has the same reach.
-4. The graph is **broadly connected in the weak sense but extremely sparse in the strong sense**, indicating a highly directional diffusion structure.
+First, users chosen at random usually have little or no ability to spread information widely. Most of them can reach only themselves or a very small number of other users.
 
-Overall, the project suggests that **directed structural position matters more than simple early appearance**.
+Second, users who appeared early in the discussion do not all behave the same way. Some of them are able to spread information very broadly, while others remain limited to small local parts of the network. This means that **being early is not enough by itself**.
+
+Third, users who are already strongly connected in the network tend to be the most powerful spreaders overall. As a group, they usually reach more users and produce deeper diffusion chains than the other two groups.
+
+Finally, the network is broadly connected if direction is ignored, but much less connected when direction is taken seriously. This suggests that information does not move freely in all directions. Instead, it tends to follow more one-way diffusion paths.
+
+Taken together, the current results suggest that information diffusion in this Twitter network is shaped mainly by **where a user sits in the overall flow of information**, not just by whether that user appeared early.
+
+In other words:
+
+* random users are usually not important spreaders,
+* early users can be either strong or weak,
+* and highly connected users are the strongest candidates overall.
+
+The results also suggest that simply counting how many direct outward connections a user has is helpful, but not always enough. Some users with many outward links spread information very widely, but others with fewer direct links can still perform strongly if they occupy a favorable position in the broader network.
+
+Overall, the project shows that **directed network position matters more than simple timing**, and that information diffusion is better understood as a structured, layered process rather than a random one.
 
 ---
 
@@ -340,6 +394,6 @@ Please refer to the original SNAP dataset source for data usage conditions.
 ---
 
 ## 16. AI usage
-I took screenshots of the output to let AI help me write down and list all the output figures and tables in this markdown document. I also described the repo structure to let AI help me draw the tree structure in this markdown document.  
+I used AI to generate some high-tech style pictures to make it look nicer. 
 
 ---
