@@ -20,15 +20,20 @@ The current implementation uses the **retweet layer** of the Higgs dataset and r
 
 ---
 
-## 2. Research Motivation
+## 2. Research Question
 
-Social media platforms are a major channel for the spread of public information. When an important scientific event occurs, information does not diffuse uniformly across the network. Some users trigger broad cascades, while others remain in small local structures.
+This project asks whether diffusion potential in a large Twitter retweet network is mainly determined by:
 
-This project uses graph algorithms to measure that structural difference. Rather than treating diffusion as an abstract concept, it quantifies it using:
+- simple early appearance,
+- random structural location,
+- or stronger directed structural position.
 
-- reachable audience size
-- propagation depth
-- shortest hop distance
+To test this, the project compares BFS diffusion outcomes across three different source-selection strategies:
+
+- **earliest_original**
+- **top_out_degree**
+- **random**
+
 
 ---
 
@@ -71,18 +76,40 @@ BFS is appropriate because it explores the graph level by level, which naturally
 ### Metrics currently computed
 For each selected source user, the project computes:
 
-- **reachable_nodes**: number of users reachable from the source
-- **reachable_ratio**: reachable nodes divided by total graph size
-- **max_depth**: maximum BFS hop level
-- **avg_distance**: average shortest-path distance to reachable nodes
-- **median_distance**: median shortest-path distance
+- `reachable_nodes`
+- `reachable_excluding_self`
+- `reachable_ratio`
+- `max_depth`
+- `avg_distance`
+- `median_distance`
+- `out_degree`
+- `in_largest_wcc`
+- `in_largest_scc`
 
-### Current source strategy
-The current experiment selects **early original-source candidates** from the retweet activity data, rather than early retweeters. This design better matches the reversed information-flow graph.
+### Structural diagnostics
+The project also measures global graph structure using:
+
+- weakly connected components (WCC)
+- strongly connected components (SCC)
+
+This helps distinguish broad weak connectivity from true directed structural core membership.
 
 ---
 
-## 5. Repository Structure
+## 5. Current Findings
+
+The current experiment supports several conclusions:
+
+1. **Random users usually have little or no diffusion ability.**
+2. **Earliest original sources are heterogeneous**: some spread broadly, while others remain trapped in very small local structures.
+3. **Top out-degree users are generally the strongest spreaders**, but not every high-degree node has the same reach.
+4. The graph is **broadly connected in the weak sense but extremely sparse in the strong sense**, indicating a highly directional diffusion structure.
+
+Overall, the project suggests that **directed structural position matters more than simple early appearance**.
+
+---
+
+## 6. Repository Structure
 
 ```text
 higgs-diffusion-bfs/
@@ -127,7 +154,7 @@ higgs-diffusion-bfs/
 
 ---
 
-## 6. Environment Setup
+## 7. Environment Setup
 
 ### Recommended Python version
 
@@ -143,7 +170,7 @@ pip install -r requirements.txt
 
 ---
 
-## 7. Download the Dataset
+## 8. Download the Dataset
 
 The raw dataset files are **not included** in this repository.
 Please download them manually and place them in:
@@ -175,7 +202,7 @@ Invoke-WebRequest `
 
 ---
 
-## 8. Configuration
+## 9. Configuration
 
 The main configuration file is:
 
@@ -193,7 +220,8 @@ paths:
   output_figures: outputs/figures
 
 experiment:
-  num_early_users: 10
+  num_earliest_sources: 10
+  num_top_out_degree_users: 10
   num_random_users: 10
   random_seed: 42
 
@@ -206,7 +234,7 @@ plot:
 
 ---
 
-## 9. How to Run
+## 10. How to Run
 
 ### Step 1: Data check
 
@@ -234,81 +262,82 @@ python scripts/run_full_pipeline.py
 
 ---
 
-## 10. Outputs
+## 11. Outputs
 
 After running the BFS experiment, the following files are generated:
 
 ### Tables
 
 * `outputs/tables/bfs_source_summary.csv`
+* `outputs/tables/bfs_source_type_summary.csv`
+* `outputs/tables/bfs_source_type_concise_summary.csv`
+* `outputs/tables/top_10_sources_by_reach.csv`
+* `outputs/tables/top_10_sources_by_depth.csv`
+* `outputs/tables/degree_reach_correlations.csv`
+* `outputs/tables/graph_summary.txt`
+* `outputs/tables/analysis_notes.txt`
 
 ### Figures
 
 * `outputs/figures/top_sources_reach.png`
 * `outputs/figures/top_sources_depth.png`
+* `outputs/figures/reachable_nodes_by_source_type_boxplot.png`
+* `outputs/figures/max_depth_by_source_type_boxplot.png`
+* `outputs/figures/mean_reachable_nodes_by_source_type.png`
+* `outputs/figures/mean_max_depth_by_source_type.png`
+* `outputs/figures/out_degree_vs_reachable_nodes.png`
 * `outputs/figures/representative_bfs_levels.png`
-
----
-
-## 11. Current Progress
-
-The current version of the project already supports:
-
-* loading the Higgs retweet graph
-* reversing edge direction for information-flow analysis
-* parsing the activity file
-* selecting early source candidates
-* running BFS from multiple source nodes
-* computing diffusion metrics
-* exporting tables and figures
-
-Initial results show that diffusion reach differs dramatically across source users. Some source nodes can reach only a few users, while others can reach tens of thousands of nodes. This suggests that **structural position in the graph strongly affects diffusion potential**.
 
 ---
 
 ## 12. Current Interpretation
 
-The first meaningful experiment shows that:
+The current results suggest that diffusion in the reversed retweet graph is not well explained by randomness or early timing alone.
 
-* not all early users trigger large diffusion cascades
-* structurally favorable users can reach a very large portion of the retweet graph
-* several source users appear to belong to the same large reachable diffusion region
+* Random nodes are usually terminal.
+* Early original sources can be either highly influential or structurally weak.
+* Top out-degree nodes are the strongest candidates overall.
+* Out-degree is useful globally, but it does not fully determine diffusion reach within already strong source groups.
 
-This supports the central project claim that **diffusion is shaped not only by timing, but also by graph structure**.
+This means that **global directed structural position** plays a central role in diffusion.
 
 ---
 
-## 13. Planned Next Steps
 
-The next development stage will add:
+## 13. Project Status
 
-* comparison across different source-selection strategies
+### Completed
 
-  * earliest original sources
-  * top out-degree users
-  * random users
-* stronger baseline analysis
-* more detailed graph diagnostics
-* improved visualizations for report writing
+* dataset loading
+* retweet graph construction
+* reversed information-flow modeling
+* BFS-based diffusion analysis
+* three source-group comparison
+* WCC / SCC diagnostics
+* degree–reach correlation analysis
+* automatic analysis notes export
 
-Possible future extensions include:
+### Next step
 
-* time-window analysis
-* comparison across retweet / reply / mention layers
-* runtime analysis across different source sets
+The next stage is to turn the current outputs into a formal written report and presentation.
 
 ---
 
 ## 14. Notes
 
 * Raw data files are excluded from version control.
-* Generated figures and tables are also excluded from Git.
-* The current BFS analysis is **unweighted**. If edge weights are incorporated later, the project may be extended to weighted diffusion analysis.
+* Generated outputs are excluded from version control.
+* The current BFS analysis is **unweighted**.
+* The project currently prioritizes **interpretability and structural analysis** over model complexity.
 
 ---
 
-## 15. License / Academic Use
+## 15. Academic Use
 
 This repository is intended for academic course-project use.
-Please check the original dataset source for data usage conditions.
+Please refer to the original SNAP dataset source for data usage conditions.
 
+````
+
+## 16. AI usage
+I took screenshots of the output to let AI help me write down and list all the output figures and tables in this markdown document. I also described the repo structure to let AI help me draw the tree structure in this markdown document.  

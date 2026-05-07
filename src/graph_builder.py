@@ -79,3 +79,32 @@ def get_largest_weakly_connected_component_nodes(graph: nx.DiGraph) -> set:
 
     largest_component = max(nx.weakly_connected_components(graph), key=len)
     return set(largest_component)
+
+
+def summarize_strongly_connected_components(graph: nx.DiGraph) -> dict:
+    if graph.number_of_nodes() == 0:
+        return {
+            "num_strongly_connected_components": 0,
+            "largest_scc_size": 0,
+            "largest_scc_ratio": 0.0,
+        }
+
+    component_sizes = sorted(
+        [len(component) for component in nx.strongly_connected_components(graph)],
+        reverse=True,
+    )
+
+    largest_scc_size = component_sizes[0] if component_sizes else 0
+
+    return {
+        "num_strongly_connected_components": len(component_sizes),
+        "largest_scc_size": largest_scc_size,
+        "largest_scc_ratio": largest_scc_size / graph.number_of_nodes(),
+    }
+
+def get_largest_strongly_connected_component_nodes(graph: nx.DiGraph) -> set:
+    if graph.number_of_nodes() == 0:
+        return set()
+
+    largest_component = max(nx.strongly_connected_components(graph), key=len)
+    return set(largest_component)

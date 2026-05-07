@@ -5,6 +5,8 @@ from src.graph_builder import(
     summarize_graph,
     summarize_weakly_connected_components,
     get_largest_weakly_connected_component_nodes,
+    summarize_strongly_connected_components,
+    get_largest_strongly_connected_component_nodes,
     )
 from src.activity_parser import load_activity_data, get_retweet_activity
 from src.source_selection import build_source_groups
@@ -20,9 +22,13 @@ def run_pipeline(config: dict):
 
     graph_summary = summarize_graph(graph)
     wcc_summary = summarize_weakly_connected_components(graph)
+    scc_summary = summarize_strongly_connected_components(graph)
+
     graph_summary.update(wcc_summary)
+    graph_summary.update(scc_summary)
 
     largest_wcc_nodes = get_largest_weakly_connected_component_nodes(graph)
+    largest_scc_nodes = get_largest_strongly_connected_component_nodes(graph)
 
     activity_df = load_activity_data(config["paths"]["activity_file"])
     retweet_df = get_retweet_activity(activity_df)
@@ -42,22 +48,34 @@ def run_pipeline(config: dict):
             source_str = str(source)
             out_degree = graph.out_degree(source_str) if source_str in graph else 0
             in_largest_wcc = source_str in largest_wcc_nodes
+            in_largest_scc = source_str in largest_scc_nodes
 
             print(
                 "Source {0}: source_type={1}, out_degree={2}, in_largest_wcc={3}".format(
-                    source_str, source_type, out_degree, in_largest_wcc
+                    source_str, source_type, out_degree, in_largest_wcc, in_largest_scc
                 )
             )
 
             distances = bfs_distances(graph, source_str)
             
             summary = summarize_bfs(distances, graph.number_of_nodes())
-            summary["source"] = source_str
-            summary["source_type"] = source_type
-            summary["out_degree"] = out_degree
-            summary["in_largest_wcc"] = in_largest_wcc
+            
+            row = {
+                "source": source_str,
+                "source_type": source_type,
+                "out_degree": out_degree,
+                "in_largest_wcc": in_largest_wcc,
+                "in_largest_scc": in_largest_scc,
+                "reachable_nodes": summary.get("reachable_nodes", 0),
+                "reachable_excluding_self": max(summary.get("reachable_nodes", 0) - 1, 0),
+                "reachable_ratio": summary.get("reachable_ratio", 0.0),
+                "max_depth": summary.get("max_depth", 0),
+                "avg_distance": summary.get("avg_distance", 0.0),
+                "median_distance": summary.get("median_distance", 0.0),
+            }
 
-            results.append(summary)
+
+            results.append(row)
             level_details["{0}::{1}".format(source_type, source_str)] = level_counts(distances)
 
     results_df = results_to_dataframe(results)
@@ -68,6 +86,7 @@ def run_pipeline(config: dict):
             "source_type",
             "out_degree",
             "in_largest_wcc",
+            "in_largest_scc",
             "reachable_nodes",
             "reachable_ratio",
             "max_depth",
@@ -88,4 +107,5 @@ def run_pipeline(config: dict):
         "source_type_summary_df": source_type_summary_df,
         "level_details": level_details,
         "largest_wcc_nodes": largest_wcc_nodes,
+        "largest_scc_nodes": largest_scc_nodes,
     }

@@ -103,3 +103,36 @@ def plot_mean_metric_by_source_type(
     _ensure_parent(output_path)
     plt.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close()
+
+def plot_out_degree_vs_reach_scatter(
+    df: pd.DataFrame,
+    output_path: str
+) -> None:
+    """
+    Scatter plot of out-degree vs reachable nodes.
+    Uses log scales to make highly skewed values readable.
+    """
+    if df.empty:
+        return
+
+    plt.figure(figsize=(9, 6))
+
+    for source_type, group_df in df.groupby("source_type"):
+        plt.scatter(
+            group_df["out_degree"] + 1,
+            group_df["reachable_nodes"] + 1,
+            label=source_type,
+            alpha=0.8,
+        )
+
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.title("Out-Degree vs Reachable Nodes")
+    plt.xlabel("Out-Degree + 1 (log scale)")
+    plt.ylabel("Reachable Nodes + 1 (log scale)")
+    plt.legend()
+    plt.tight_layout()
+
+    _ensure_parent(output_path)
+    plt.savefig(output_path, dpi=200, bbox_inches="tight")
+    plt.close()
