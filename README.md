@@ -337,7 +337,9 @@ The next stage is to turn the current outputs into a formal written report and p
 This repository is intended for academic course-project use.
 Please refer to the original SNAP dataset source for data usage conditions.
 
-````
+---
 
 ## 16. AI usage
 I took screenshots of the output to let AI help me write down and list all the output figures and tables in this markdown document. I also described the repo structure to let AI help me draw the tree structure in this markdown document.  
+
+---
