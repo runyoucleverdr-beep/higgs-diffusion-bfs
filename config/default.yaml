@@ -5,10 +5,10 @@ paths:
   output_figures: outputs/figures
 
 experiment:
-  num_early_users: 10
   num_random_users: 10
   random_seed: 42
   num_earliest_sources: 10
+  num_top_out_degree_users: 10
 
 graph:
   reverse_for_information_flow: true

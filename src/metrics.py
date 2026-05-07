@@ -25,6 +25,7 @@ def summarize_by_source_type(df: pd.DataFrame) -> pd.DataFrame:
         "max_depth",
         "avg_distance",
         "median_distance",
+        "in_largest_wcc",
     ]
     summary = (
         df.groupby("source_type")[metric_cols]
@@ -33,7 +34,7 @@ def summarize_by_source_type(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     summary.columns = [
-        f"{col}_{stat}" for col, stat in summary.columns.to_flat_index()
+        "{0}_{1}".format(col, stat) for col, stat in summary.columns.to_flat_index()
     ]
     summary = summary.reset_index()
 

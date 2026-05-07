@@ -69,3 +69,13 @@ def summarize_weakly_connected_components(graph: nx.DiGraph) -> dict:
         "largest_wcc_size": largest_wcc_size,
         "largest_wcc_ratio": largest_wcc_size / graph.number_of_nodes(),
     }
+
+def get_largest_weakly_connected_component_nodes(graph: nx.DiGraph) -> set:
+    """
+    Return the node set of the largest weakly connected component.
+    """
+    if graph.number_of_nodes() == 0:
+        return set()
+
+    largest_component = max(nx.weakly_connected_components(graph), key=len)
+    return set(largest_component)
